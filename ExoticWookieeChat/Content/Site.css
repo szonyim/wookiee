@@ -1,0 +1,112 @@
+﻿.green{color: #84B943; }
+.orange {
+    color: #ff6a00;
+}
+
+.red{
+    color: #ff0000;
+}
+
+.message-container{
+    min-height:100%;
+    padding: 15px;
+    border: 1px solid #e1e1e1;
+}
+
+.message {
+    padding: 5px 10px;
+    border: 1px solid #84B943;
+    background-color: #559A00;
+    color: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.message-left {
+    float: left;
+}
+
+.message-right {
+    float: right;
+}
+
+.message-center{
+    width: 200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.message:after{
+    clear:both;
+}
+
+.conv-controls {
+    width: 100%;
+    border: 1px solid #e1e1e1;
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    padding-right: 10px;
+}
+
+.ewc-container {
+    position: absolute;
+    right: 50px;
+    bottom: 0;
+    height: 423px;;
+    width: 600px;
+    border: 1px solid #84B943;
+    display: flex;
+    flex-direction: column;
+    z-index:9999;
+    display:none;
+}
+
+    .ewc-container .status-bar{
+        background-color: #84B943;
+        color: #fff;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .ewc-container .customer-message-container {
+        height: 100%;
+        flex: 1;
+        background-color: white;
+    }
+
+    .ewc-container .input {
+        position: absolute;
+        bottom: 0;
+    }
+    .ewc-container .input button{
+
+    }
+
+#messageInput:focus,
+#messageInput:active,
+#messageInput:hover {
+    outline: 0px !important;
+    -webkit-appearance: none;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.list-group-item.active{
+    background-color: #84B943;
+}
+
+.list-group-item a {
+    color: #84B943;
+}
+
+.list-group-item.active a,
+.list-group-item.active i {
+    color: #fff;
+}

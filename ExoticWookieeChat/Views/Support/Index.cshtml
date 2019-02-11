@@ -1,0 +1,89 @@
+﻿@using ExoticWookieeChat.Models;
+@using ExoticWookieeChat.Constants;
+
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Wookiee Repellent Support</h2>
+
+
+<div class="row">
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                Conversations
+                <select id="ConversationState" name="ConversationState" class="form-control">
+                    <option value="">State filter...</option>
+                    <option value="@ConversationConstants.STATE_NEW" @(ViewBag.Filter == ConversationConstants.STATE_NEW ? "selected" : "")>New</option>
+                    <option value="@ConversationConstants.STATE_IN_PROGRESS" @(ViewBag.Filter == ConversationConstants.STATE_IN_PROGRESS ? "selected" : "")>In progress</option>
+                    <option value="@ConversationConstants.STATE_CLOSED" @(ViewBag.Filter == ConversationConstants.STATE_CLOSED ? "selected" : "")>Closed</option>
+                </select>
+            </div>
+            <div class="list-group list-group-flush pre-scrollable">
+                @foreach(Conversation conversation in ViewBag.Conversations)
+                {
+                    <div id="ConversationItem_@conversation.Id" class="list-group-item list-group-item-action ">
+                        <div class="row">
+                            <div class="col-1">
+                                @if(conversation.State == (byte)Conversation.States.New)
+                                {
+                                    <i class="far fa-circle green" title="New"></i>
+                                }
+                                else if(conversation.State == (byte)Conversation.States.InProgress)
+                                {
+                                    <i class="far fa-dot-circle orange" title="In progress"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-circle red" title="Closed"></i>
+                                }
+                            </div>
+                            <div class="col-10">
+                                <a href="javascript:void(0)" id="conversation_@conversation.Id" onclick="LoadConversation(@conversation.Id)">
+                                    @conversation.SocketGuid.ToString()
+                                </a>
+                            </div>
+                            <div class="col-1">
+                                @if(conversation.State == (byte)Conversation.States.Closed)
+                                {
+                                    <button href="javascript:void(0)" onclick="RemoveConversation(@conversation.Id)" class="btn btn-danger btn-sm float-right" title="Delete conversation" style="display:inline"> <i class="far fa-trash-alt"></i> </button>
+                                }
+                                
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-8">
+        <div>
+            <div class="conv-controls">
+                <div>
+                    <div class="float-left">
+                        <button id="openConnectionBtn" class="btn btn-primary btn-sm">Connect to the conversation</button>
+                    </div>
+                    <div class="float-right text-right">
+                        <strong>Status:</strong> <span id="Status">Disconnected</span>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            
+            <div id="MessageContainer" class="pre-scrollable message-container">
+                <div class="message message-center">No message yet...</div>
+            </div>
+
+            <div class="input-group mb-3 ">
+                <input type="text" id="messageInput" class="form-control" placeholder="Write something..." aria-label="Write something..." aria-describedby="button-addon2" disabled>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="sendMessageBtn">></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

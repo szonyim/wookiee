@@ -1,0 +1,42 @@
+﻿@model ExoticWookieeChat.ViewModel.LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+@section Styles {
+    <link href="@Url.Content("~/Content/Login.css")" rel="stylesheet" type="text/css" />
+}
+
+<h2>Employee login</h2>
+
+@using (Html.BeginForm())
+{
+    if (ViewBag.LoginError == true )
+    {
+        <div class="alert alert-danger">User name or password is incorrect!</div>
+    }
+
+    <div class="row">
+        <div class="col-sm-7 col-md-5 col-lg-3 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Sign In</h5>
+                    <form class="form-signin">
+                        <div class="form-label-group">
+                            @Html.LabelFor(m => m.UserName, htmlAttributes: new { @class = "control-label" })
+                            @Html.TextBoxFor(model => model.UserName, htmlAttributes: new { @class = "form-control" } )
+                        </div>
+
+                        <div class="form-label-group">
+                            @Html.LabelFor(m => m.Password, htmlAttributes: new { @class = "control-label" })
+                            @Html.PasswordFor(m => m.Password, htmlAttributes: new { @class = "form-control" })
+                        </div>
+                        
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Sign in</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

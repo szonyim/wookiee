@@ -1,0 +1,92 @@
+﻿@using ExoticWookieeChat.Constants;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Exotic Eradicators Inc.</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    
+    @RenderSection("Styles", required: false)
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+
+                <li class="nav-item active">
+                    @Html.ActionLink("Wookiee Home", "Index", "Home", null, htmlAttributes: new { @class="nav-link" })
+                </li>
+
+                <li class="nav-item">
+                    @Html.ActionLink("About Wookiee Repellent spary", "About", "Home", null, htmlAttributes: new { @class="nav-link" })
+                </li>
+
+                <li class="nav-item">
+                    @Html.ActionLink("Live support", "", "", new {href="javascript:void(0)", onclick="handleConversationVisibility()", @class="nav-link"})
+
+                    @* @Html.ActionLink("Live support", "Contact", "Home", null, htmlAttributes: new { @class="nav-link" })*@
+                </li>
+
+            </ul>
+
+            <ul class="navbar-nav mr-1">
+                @if (Request.IsAuthenticated && User.IsInRole(UserRoleConstants.ROLE_ADMIN))
+                {
+                    <li class="nav-item">
+                        @Html.ActionLink("Users management", "Index", "Users", null, htmlAttributes: new { @class = "nav-link" })
+                    </li>
+                }
+
+                <li class="nav-item">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <span>
+                            @Html.ActionLink("Logout", "", "", new {href="javascript:void(0)", onclick="Logout()", @class="nav-link"})
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            @Html.ActionLink("Employee login", "Login", "Auth", null, htmlAttributes: new { @class = "nav-link" })
+                        </span>
+                    }
+
+                </li>
+            </ul>
+
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Exotic Eradicators Inc.</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/global")
+
+    @if (Request.IsAuthenticated == false)
+    {
+        @Scripts.Render("~/bundles/customer")
+    }
+    else
+    {
+        @Scripts.Render("~/bundles/support")
+    }
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
