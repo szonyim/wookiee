@@ -1,6 +1,6 @@
 ﻿
 .jumbotron {
-    background-color: #A2D463 !important;
+    background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
 }
 
 .green{color: #84B943; }
@@ -120,4 +120,9 @@
 .alert-incoming-conversation{
     margin: 0 !important;
     display: none;
+}
+
+.mini-wookiee{
+    margin: 0 50px 0 20px;
+    float: left;
 }

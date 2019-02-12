@@ -28,10 +28,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/23/2017 13:15:20</publishTime>
     </File>
     <File Include="bin/ExoticWookieeChat.dll">
-      <publishTime>02/12/2019 23:04:10</publishTime>
+      <publishTime>02/12/2019 23:25:45</publishTime>
     </File>
     <File Include="bin/ExoticWookieeChat.pdb">
-      <publishTime>02/12/2019 23:04:10</publishTime>
+      <publishTime>02/12/2019 23:25:45</publishTime>
     </File>
     <File Include="bin/Microsoft.AspNet.TelemetryCorrelation.dll">
       <publishTime>11/21/2018 01:48:22</publishTime>
@@ -262,13 +262,19 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/10/2019 17:46:54</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>02/12/2019 20:05:28</publishTime>
+      <publishTime>02/12/2019 23:25:38</publishTime>
     </File>
     <File Include="favicon.ico">
       <publishTime>02/07/2019 17:03:34</publishTime>
     </File>
     <File Include="Global.asax">
       <publishTime>02/07/2019 17:03:34</publishTime>
+    </File>
+    <File Include="Public/images/mini_wookiee.jpg">
+      <publishTime>02/12/2019 23:12:20</publishTime>
+    </File>
+    <File Include="Public/images/mini_wookiee.png">
+      <publishTime>02/12/2019 23:16:19</publishTime>
     </File>
     <File Include="Scripts/bootstrap.bundle.js">
       <publishTime>02/07/2019 17:45:39</publishTime>
@@ -424,7 +430,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/12/2019 17:30:19</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>02/12/2019 18:05:04</publishTime>
+      <publishTime>02/12/2019 23:20:29</publishTime>
     </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>02/07/2019 17:03:34</publishTime>
