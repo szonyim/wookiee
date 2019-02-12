@@ -145,6 +145,7 @@
     <Compile Include="Constants\UserRoleConstants.cs" />
     <Compile Include="Util\PasswordUtil.cs" />
     <Compile Include="ViewModel\LoginViewModel.cs" />
+    <Compile Include="ViewModel\PasswordChangeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\EWCDatabase.mdf" />
@@ -238,6 +239,7 @@
     <Content Include="Views\Users\Details.cshtml" />
     <Content Include="Views\Users\Edit.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
+    <Content Include="Views\Users\ChangePassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

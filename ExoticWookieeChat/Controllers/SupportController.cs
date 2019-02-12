@@ -51,7 +51,7 @@ namespace ExoticWookieeChat.Controllers
 
             ViewBag.Filter = filter;
             ViewBag.Title = "Conversation list";
-            ViewBag.Conversations = Conversations;
+            ViewBag.Conversations = Conversations.Reverse<Conversation>();
 
             return View();
         }

@@ -8,6 +8,9 @@ using System.Web.Security;
 
 namespace ExoticWookieeChat.Controllers
 {
+    /// <summary>
+    /// Authenticate the user
+    /// </summary>
     public class AuthController : Controller
     {
         private readonly DataContext dc;

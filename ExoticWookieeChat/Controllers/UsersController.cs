@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using ExoticWookieeChat.Constants;
 using ExoticWookieeChat.Models;
 using ExoticWookieeChat.Util;
+using ExoticWookieeChat.ViewModel;
 
 namespace ExoticWookieeChat.Controllers
 {
@@ -91,11 +92,16 @@ namespace ExoticWookieeChat.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,DisplayName,UserName,Password,CreatedAt,Role")] User user)
+        public ActionResult Edit([Bind(Include = "Id,DisplayName,UserName")] User user)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(user).State = EntityState.Modified;
+                if (user.Password == user.ConfirmPassword)
+                {
+                    String hashedPassword = PasswordUtil.GenerateSHA512String(user.Password);
+                    user.Password = hashedPassword;
+                }
+                    db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -126,6 +132,46 @@ namespace ExoticWookieeChat.Controllers
             db.Users.Remove(user);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        public ActionResult ChangePassword(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            User user = db.Users.Find(id);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            PasswordChangeViewModel pcvm = new PasswordChangeViewModel()
+            {
+                UserId = user.Id
+            };
+
+            return View(pcvm);
+        }
+
+        [HttpPost, ActionName("ChangePassword")]
+        public ActionResult ChangePassword([Bind(Include = "UserId, OldPassword, NewPassword, ConfirmNewPassword")]PasswordChangeViewModel pcvm)
+        {
+            User user = db.Users.Find(pcvm.UserId);
+
+            if(user == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (ModelState.IsValid && pcvm.ValidateOldaPassword(user.Password) && pcvm.ValidateNewPassword())
+            {
+                user.Password = pcvm.GetHashedNewPassword();
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            return View(pcvm);
         }
 
         protected override void Dispose(bool disposing)
