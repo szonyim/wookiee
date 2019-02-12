@@ -28,10 +28,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/23/2017 13:15:20</publishTime>
     </File>
     <File Include="bin/ExoticWookieeChat.dll">
-      <publishTime>02/11/2019 21:37:09</publishTime>
+      <publishTime>02/12/2019 23:04:10</publishTime>
     </File>
     <File Include="bin/ExoticWookieeChat.pdb">
-      <publishTime>02/11/2019 21:37:09</publishTime>
+      <publishTime>02/12/2019 23:04:10</publishTime>
     </File>
     <File Include="bin/Microsoft.AspNet.TelemetryCorrelation.dll">
       <publishTime>11/21/2018 01:48:22</publishTime>
@@ -262,7 +262,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/10/2019 17:46:54</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>02/11/2019 21:31:56</publishTime>
+      <publishTime>02/12/2019 20:05:28</publishTime>
     </File>
     <File Include="favicon.ico">
       <publishTime>02/07/2019 17:03:34</publishTime>
@@ -379,13 +379,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/07/2019 17:45:54</publishTime>
     </File>
     <File Include="Scripts/site/EWCCustomer.js">
-      <publishTime>02/11/2019 21:36:28</publishTime>
+      <publishTime>02/12/2019 20:44:28</publishTime>
     </File>
     <File Include="Scripts/site/EWCGlobal.js">
-      <publishTime>02/09/2019 19:45:17</publishTime>
+      <publishTime>02/12/2019 22:28:36</publishTime>
     </File>
     <File Include="Scripts/site/EWCSupport.js">
-      <publishTime>02/11/2019 21:36:53</publishTime>
+      <publishTime>02/12/2019 22:54:05</publishTime>
     </File>
     <File Include="Scripts/umd/popper-utils.js">
       <publishTime>02/07/2019 17:45:54</publishTime>
@@ -421,34 +421,37 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/07/2019 17:03:34</publishTime>
     </File>
     <File Include="Views/Home/ConversationWindow.cshtml">
-      <publishTime>02/11/2019 21:32:00</publishTime>
+      <publishTime>02/12/2019 17:30:19</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>02/11/2019 21:19:58</publishTime>
+      <publishTime>02/12/2019 18:05:04</publishTime>
     </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>02/07/2019 17:03:34</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>02/10/2019 21:34:04</publishTime>
+      <publishTime>02/12/2019 22:30:35</publishTime>
     </File>
     <File Include="Views/Support/Index.cshtml">
-      <publishTime>02/11/2019 21:02:04</publishTime>
+      <publishTime>02/12/2019 20:04:56</publishTime>
+    </File>
+    <File Include="Views/Users/ChangePassword.cshtml">
+      <publishTime>02/12/2019 17:03:33</publishTime>
     </File>
     <File Include="Views/Users/Create.cshtml">
       <publishTime>02/10/2019 21:01:12</publishTime>
     </File>
     <File Include="Views/Users/Delete.cshtml">
-      <publishTime>02/10/2019 20:41:26</publishTime>
+      <publishTime>02/12/2019 23:01:14</publishTime>
     </File>
     <File Include="Views/Users/Details.cshtml">
       <publishTime>02/10/2019 20:41:26</publishTime>
     </File>
     <File Include="Views/Users/Edit.cshtml">
-      <publishTime>02/10/2019 20:41:27</publishTime>
+      <publishTime>02/12/2019 22:58:00</publishTime>
     </File>
     <File Include="Views/Users/Index.cshtml">
-      <publishTime>02/10/2019 20:47:45</publishTime>
+      <publishTime>02/12/2019 17:03:33</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>02/09/2019 23:30:20</publishTime>

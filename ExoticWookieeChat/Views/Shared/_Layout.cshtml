@@ -27,13 +27,7 @@
                 </li>
 
                 <li class="nav-item">
-                    @Html.ActionLink("About Wookiee Repellent spary", "About", "Home", null, htmlAttributes: new { @class="nav-link" })
-                </li>
-
-                <li class="nav-item">
                     @Html.ActionLink("Live support", "", "", new {href="javascript:void(0)", onclick="handleConversationVisibility()", @class="nav-link"})
-
-                    @* @Html.ActionLink("Live support", "Contact", "Home", null, htmlAttributes: new { @class="nav-link" })*@
                 </li>
 
             </ul>
@@ -41,6 +35,10 @@
             <ul class="navbar-nav mr-1">
                 @if (Request.IsAuthenticated && User.IsInRole(UserRoleConstants.ROLE_ADMIN))
                 {
+                    <li class="nav-item">
+                        @Html.ActionLink("Support", "Index", "Support", null, htmlAttributes: new { @class = "nav-link" })
+                    </li>
+
                     <li class="nav-item">
                         @Html.ActionLink("Users management", "Index", "Users", null, htmlAttributes: new { @class = "nav-link" })
                     </li>
@@ -68,6 +66,9 @@
 
     <div class="container-fluid">
         @RenderBody()
+
+        @Html.Partial("../Home/ConversationWindow")
+
         <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year - Exotic Eradicators Inc.</p>
@@ -77,15 +78,8 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/global")
-
-    @if (Request.IsAuthenticated == false)
-    {
-        @Scripts.Render("~/bundles/customer")
-    }
-    else
-    {
-        @Scripts.Render("~/bundles/support")
-    }
+    @Scripts.Render("~/bundles/customer")
+    @Scripts.Render("~/bundles/support")
 
     @RenderSection("scripts", required: false)
 </body>

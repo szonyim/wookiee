@@ -17,6 +17,8 @@ namespace ExoticWookieeChat.Models
 
         public byte State { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
         public virtual ICollection<Message> Messages { get; set; }
     }
 }

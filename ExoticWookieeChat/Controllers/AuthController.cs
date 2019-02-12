@@ -31,37 +31,42 @@ namespace ExoticWookieeChat.Controllers
         {
             bool LoginError = false;
 
-            if (ModelState.IsValid)
+            try
             {
-                using (DataContext dc = DataContext.CreateContext())
+                if (ModelState.IsValid)
                 {
-                    string hashedPwd = loginViewModel.GetSHA512Password();
-                    User user = dc.Users.FirstOrDefault(e => e.UserName == loginViewModel.UserName && e.Password == hashedPwd);
-
-                    if(user != null)
+                    using (DataContext dc = DataContext.CreateContext())
                     {
-                        FormsAuthenticationTicket authTicket =
-                        new FormsAuthenticationTicket(1, loginViewModel.UserName, DateTime.Now, DateTime.Now.AddMinutes(60), false, user.Role);
+                        string hashedPwd = loginViewModel.GetSHA512Password();
+                        User user = dc.Users.FirstOrDefault(e => e.UserName == loginViewModel.UserName && e.Password == hashedPwd);
 
-                        string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
-                        HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
+                        if (user != null)
+                        {
+                            FormsAuthenticationTicket authTicket =
+                            new FormsAuthenticationTicket(1, loginViewModel.UserName, DateTime.Now, DateTime.Now.AddMinutes(60), false, user.Role);
 
-                        Response.Cookies.Add(authCookie);
-                        Response.Redirect(FormsAuthentication.GetRedirectUrl(loginViewModel.UserName, false));
-                    }
-                    else
-                    {
-                        LoginError = true;
+                            string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
+                            HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
+
+                            Response.Cookies.Add(authCookie);
+                            Response.Redirect(FormsAuthentication.GetRedirectUrl(loginViewModel.UserName, false));
+                        }
+                        else
+                        {
+                            LoginError = true;
+                        }
                     }
                 }
-            }
-            else
+                else
+                {
+                    LoginError = true;
+                }
+            }catch(Exception e)
             {
                 LoginError = true;
             }
 
             ViewBag.LoginError = LoginError;
-
             return View(loginViewModel);
         }
 

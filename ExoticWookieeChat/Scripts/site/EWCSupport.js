@@ -1,25 +1,26 @@
-﻿const SENDER_SUPPORT = "support";
-const SENDER_CUSTOMER = "customer";
+﻿const newItemSign = "<i class='far fa-circle green state-sign' title='New'></i>";
+const InProgressItemSign = "<i class='far fa-dot-circle orange state-sign' title='In progress'></i>";
+const ClosedItemSign = "<i class='fas fa-circle red state-sign' title='Closed'></i>";
 
 const SocketTypes = {
     MessageExchange: "messageExchange",
     CommandListener: "commandListener"
 };
 
-
-const port = window.location.port ? ':' + window.location.port : '';
-const host = "http://" + window.location.hostname + port;
-const wsHost = "ws://" + window.location.hostname + port + "/MessageCenter";
-const commandListenerHost = "ws://" + window.location.hostname + port + "/MessageCenter?SocketType=" + SocketTypes.CommandListener;
-
+const commandListenerHost = messageCenterHost + "?SocketType=" + SocketTypes.CommandListener;
 const SocketMessageType = { Normal: 0, System: 1, Command: 2 };
 
 const SocketMessageCommands = {
     ReloadConversationList: "reloadConversationList",
     ReloadSupportInterface: "reloadSupportInterface",
-    AlertNewConversation: "alertNewIncomingConversation"
+    AlertNewConversation: "alertNewIncomingConversation",
+    AddNewConversation: "addNewConversation"
 };
 
+const fetchHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+};
 
 var WebSocketConnections = [];
 var CurrentConnection;
@@ -30,16 +31,11 @@ var CurrentConnection;
  */
 function LoadConversation(conversationId) {
     ClearMessageContainer();
-
+    $("#messageInput").attr("disabled", "disabled");
     var conversationUrl = "http://" + window.location.hostname + ':' + window.location.port + "/Support/LoadConversation?ConversationId=" + conversationId;
 
-    console.log(conversationUrl);
-
     fetch(conversationUrl, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+        headers: fetchHeaders
     })
     .then(
         function (response) {
@@ -63,24 +59,15 @@ function LoadConversation(conversationId) {
             $("#MessageContainer").scrollTop(scrollHeight);
             $("#ConversationItem_" + conversationId).addClass("active");
 
-
-
-
+                       
             $("#openConnectionBtn").on("click", function () {
                 if (conversation.State === 0 || conversation.State === 1) {
+
                     OpenWebSocket(item.Conversation.SocketGuid);
                 } else {
                     alert("Conversation was closed!");
                 }
             });
-
-            for (var j = 0; j < WebSocketConnections.length; j++) {
-                var connection = WebSocketConnections[j];
-                if (connection.customerWebSocketGuid === customerWebSocketGuid) {
-                    CurrentConnection = connection;
-                    $("#messageInput").removeAttr("disabled");
-                }
-            }
         }
     );
 }
@@ -99,12 +86,10 @@ function OpenWebSocket(customerWebSocketGuid) {
     }
 
     if (typeof (CurrentConnection) === "undefined" || CurrentConnection.customerWebSocketGuid !== customerWebSocketGuid) {
-        var WebSocketHostToCustomer = wsHost + "?customerWebSocketGuid=" + customerWebSocketGuid;
-        console.log(WebSocketHostToCustomer);
+        var WebSocketHostToCustomer = messageCenterHost + "?customerWebSocketGuid=" + customerWebSocketGuid;
         var ws = new WebSocket(WebSocketHostToCustomer);
 
         ws.onopen = function () {
-            $("#messageInput").removeAttr("disabled");
             $("#Status").text("Connected");
         };
 
@@ -132,21 +117,23 @@ function OpenWebSocket(customerWebSocketGuid) {
         CurrentConnection = new WSConnection(customerWebSocketGuid, ws);
         WebSocketConnections.push(CurrentConnection);
     }
+
+    if (CurrentConnection !== "undefined")
+        $("#messageInput").removeAttr("disabled");
 }
 
 /**
  * Send employee message to customer
  */
 function SendMessage() {
-    console.log("send message");
-
     if (typeof (CurrentConnection) !== "undefined") {
         var ws = CurrentConnection.WebSocketObj;
         
         if (ws.readyState === WebSocket.OPEN && $("#messageInput").val() !== "") {
 
             var NewMessage = {
-                Content: $("#messageInput").val()
+                Content: $("#messageInput").val(),
+                Sender: SENDER_SUPPORT
             };
             
             ws.send(JSON.stringify(NewMessage));
@@ -163,12 +150,18 @@ function WSConnection(customerWebSocketGuid, WebSocketObj) {
     this.WebSocketObj = WebSocketObj;
 }
 
+/**
+ * Clear message container
+ */
 function ClearMessageContainer() {
     $("#MessageContainer").html("");
     $(".list-group .active").removeClass("active");
 }
 
-
+/**
+ * Message prototype
+ * @param {any} rawSocketData raw data from the server
+ */
 function Message(rawSocketData) {
     var data = (typeof (rawSocketData) === "object") ? rawSocketData : JSON.parse(rawSocketData);
 
@@ -179,11 +172,14 @@ function Message(rawSocketData) {
     this.Type = data.Type;
 
     if (this.Type === SocketMessageType.Command) {
-        console.log("socket message is a command");
         this.ExecuteCommandMessage();
     }
 }
 
+/**
+ * Extend customer prototype
+ * @returns {any} Formatted html
+ */
 Message.prototype.getHtmlContent = function () {
 
     if (this.Type === SocketMessageType.Command) {
@@ -213,6 +209,9 @@ Message.prototype.getHtmlContent = function () {
         "<div class='clearfix'></div>";
 };
 
+/**
+ * Extend Message prototype. Execute incoming command messages
+ */
 Message.prototype.ExecuteCommandMessage = function () {
     switch (this.Command) {
         case SocketMessageCommands.ReloadConversationList:
@@ -224,7 +223,11 @@ Message.prototype.ExecuteCommandMessage = function () {
             break;
 
         case SocketMessageCommands.AlertNewConversation:
-            alert("New incoming conversiont!");
+            AlertNewConversation();
+            break;
+
+        case SocketMessageCommands.AddNewConversation:
+            AddNewConversation(this.Content);
             break;
 
         default:
@@ -233,9 +236,45 @@ Message.prototype.ExecuteCommandMessage = function () {
     }
 };
 
+/**
+ * Query new conversation data from server, and insert to list
+ * @param {any} conversationId Id of conversation
+ */
+function AddNewConversation(conversationId) {
+    var GetConversationUrl = host + "/Support/GetConversation?ConversationId=" + conversationId;
 
-function ReloadConversationList() {
-    // TODO implement
+    fetch(GetConversationUrl)
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (response) {
+                const itemHtml =
+            "<div id='ConversationItem_" + response.Id + "' class='list-group-item list-group-item-action'>" +
+                "<div class='row'>" +
+                    "<div class='col-1'>" +
+                        "<i class='far fa-circle green state-sign' title='New'></i>" +
+                    "</div>" +
+                    "<div class='col-10'>" +
+                        "<a href='javascript:void(0)' id='conversation_" + response.Id + "' onclick='LoadConversation(" + response.Id + ")'>" +
+                            response.SocketGuid +
+                        "</a><br/>" +
+                        "<small>Now</small>"+
+                    "</div>" +
+                    "<div class='col-1'>" +
+                        "<button href='javascript:void(0)' onclick='RemoveConversation(" + response.Id + ")' class='btn btn-danger btn-sm float-right' title='Delete conversation' style='display:inline'> <i class='far fa-trash-alt'></i> </button>" +
+                    "</div>" +
+                "</div>" +
+            "</div>";
+
+        $("#ConversationList").prepend(itemHtml);
+    });
+}
+
+/**
+ * Show and hide notification about new connection
+ */
+function AlertNewConversation() {
+    $("#newIncomingConversation").slideDown().delay(3000).slideUp();
 }
 
 /**
@@ -244,8 +283,6 @@ function ReloadConversationList() {
 function RegisterCommandListenerWebSocket() {
 
     var commandListenerWebSocket = new WebSocket(commandListenerHost);
-    
-
     commandListenerWebSocket.onopen = function () {
     };
 
@@ -260,7 +297,12 @@ function RegisterCommandListenerWebSocket() {
     };
 }
 
+/**
+ * Remove one selected conversation from database and view
+ * @param {any} ConversationId Id of selected conversation
+ */
 function RemoveConversation(ConversationId) {
+    // TODO Close connections
     const removeConversationUrl = host + "/Support/RemoveConversation?ConversationId=" + ConversationId;
 
     fetch(removeConversationUrl)
@@ -280,10 +322,72 @@ function RemoveConversation(ConversationId) {
 
 $(document).ready(function () {
     $("#ConversationState").on("change", function () {
-        console.log("ConversationState", this.value);
-        window.location.href = "/Support?State=" + this.value;
+        ReloadConversationList(this.value);
+        //window.location.href = "/Support?State=" + this.value;
     });
 
     RegisterCommandListenerWebSocket();
+
+    $("#sendMessageBtn").on("click", SendMessage);
+    $('#messageInput').keyup(function (e) {
+        if (e.keyCode === 13) {
+            SendMessage();
+        }
+    });
 });
 
+/**
+ * Create html item for list
+ * @param {any} item Conversation json item
+ * @returns {any} Conversation html element
+ */
+function CreateConversationItemHtml(item) {
+    var itemSign;
+
+    if (item.State === ConversationStates.New) {
+        itemSign = newItemSign;
+    } else if (item.State === ConversationStates.InProgress) {
+        itemSign = InProgressItemSign;
+    } else {
+        itemSign = ClosedItemSign;
+    }
+
+    return "<div id='ConversationItem_" + item.Id + "' class='list-group-item list-group-item-action'>" +
+            "<div class='row'>" +
+                "<div class='col-1'>" +
+                    itemSign +
+                "</div>" +
+                "<div class='col-10'>" +
+                    "<a href='javascript:void(0)' id='conversation_" + item.Id + "' onclick='LoadConversation(" + item.Id + ")'>" +
+                        item.SocketGuid +
+                    "</a><br/>" +
+                    "<small>Now</small>" +
+                "</div>" +
+                "<div class='col-1'>" +
+                    "<button href='javascript:void(0)' onclick='RemoveConversation(" + item.Id + ")' class='btn btn-danger btn-sm float-right' title='Delete conversation' style='display:inline'> <i class='far fa-trash-alt'></i> </button>" +
+                "</div>" +
+            "</div>" +
+        "</div>";
+}
+
+/**
+ * Reload conversation list in background
+ * @param {any} selectedState Selected state in view
+ */
+function ReloadConversationList(selectedState) {
+
+    const listConversationUrl = host + "/Support/GetConversationList?State=" + selectedState;
+
+    fetch(listConversationUrl)
+    .then(
+        function (response) {
+            return response.json();
+        }
+    )
+    .then(
+        function (response) {
+            var htmlItems = $.map(response, CreateConversationItemHtml);
+            $("#ConversationList").html(htmlItems);
+        }
+    );
+}

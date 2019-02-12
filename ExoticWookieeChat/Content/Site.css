@@ -1,4 +1,9 @@
-﻿.green{color: #84B943; }
+﻿
+.jumbotron {
+    background-color: #A2D463 !important;
+}
+
+.green{color: #84B943; }
 .orange {
     color: #ff6a00;
 }
@@ -84,9 +89,6 @@
         position: absolute;
         bottom: 0;
     }
-    .ewc-container .input button{
-
-    }
 
 #messageInput:focus,
 #messageInput:active,
@@ -109,4 +111,13 @@
 .list-group-item.active a,
 .list-group-item.active i {
     color: #fff;
+}
+
+.state-sign{
+    margin-top: 15px;
+}
+
+.alert-incoming-conversation{
+    margin: 0 !important;
+    display: none;
 }

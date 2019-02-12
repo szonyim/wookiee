@@ -8,7 +8,7 @@ namespace ExoticWookieeChat.Connections
     /// </summary>
     public class WebSocketConnection
     {
-        public enum ConnectionTypes : byte { Customer, Employee, Administrator };
+        public enum ConnectionTypes : byte { Customer, Employee, Administrator, Command };
 
         /// <summary>
         /// Guid of connection

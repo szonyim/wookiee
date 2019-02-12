@@ -96,12 +96,7 @@ namespace ExoticWookieeChat.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (user.Password == user.ConfirmPassword)
-                {
-                    String hashedPassword = PasswordUtil.GenerateSHA512String(user.Password);
-                    user.Password = hashedPassword;
-                }
-                    db.Entry(user).State = EntityState.Modified;
+                db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }

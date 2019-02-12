@@ -2,6 +2,9 @@
 
 namespace ExoticWookieeChat.Models
 {
+    /// <summary>
+    /// Represent a socket message
+    /// </summary>
     public class SocketMessage
     {
         public const String SENDER_CUSTOMER = "customer";
@@ -11,7 +14,11 @@ namespace ExoticWookieeChat.Models
         public const String COMMAND_RELOAD_CONVERSTION_LIST = "reloadConversationList";
         public const String COMMAND_RELOAD_SUPPORT_INTREFACE = "reloadSupportInterface";
         public const String COMMAND_ALERT_NEW_CONVERSATION = "alertNewIncomingConversation";
+        public const String COMMAND_ADD_NEW_CONVERSATION = "addNewConversation";
 
+        /// <summary>
+        /// Types of SocketMessage
+        /// </summary>
         public enum Types { Normal = 0, System = 1, Command = 2 }
 
         /// <summary>

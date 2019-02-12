@@ -1,82 +1,96 @@
-﻿const SENDER_CUSTOMER = "customer";
-const port = window.location.port ? (':' + window.location.port) : '';
-const wsHost = "ws://" + window.location.hostname + port + "/MessageCenter";
+﻿/**
+ * WebSocket object for customer
+ */
+var customerWebSocket;
 
-var ws;
-
-function SendMessage() {
-    if (typeof(ws) === "undefined") {
-        CreateWebSocket();
+/**
+ * Send customer message on WebSocket
+ */
+function SendCustomerMessage() {
+    if (typeof (customerWebSocket) === "undefined") {
+        CreateCustomerWebSocket();
     }
 
-    waitForSocketConnection(ws, function () {
-        if (ws.readyState === WebSocket.OPEN && $("#messageInput").val() !== "") {
+    WaitForSocketConnection(customerWebSocket, function () {
+        if (customerWebSocket.readyState === WebSocket.OPEN && $("#customerMessageInput").val() !== "") {
             var NewMessage = {
-                Content: $("#messageInput").val()
+                Content: $("#customerMessageInput").val(),
+                Sender: SENDER_CUSTOMER
             };
 
-            ws.send(JSON.stringify(NewMessage));
+            customerWebSocket.send(JSON.stringify(NewMessage));
 
-            $("#messageInput").val("");
+            $("#customerMessageInput").val("");
         } else {
-            $("#Status").text("Connection is closed");
+            $("#CustomerConnectionStatus").text("Connection is closed");
         }
     });
 }
 
-function waitForSocketConnection(socket, callback) {
+/**
+ * Wait for connection. If connection is connect, call callback function
+ * @param {any} socket WebSocker object
+ * @param {any} callback callback function
+ */
+function WaitForSocketConnection(socket, callback) {
     setTimeout(
         function () {
             if (socket.readyState === 1) {
                 if (callback !== null) {
-                    $("#Status").text("Connected");
+                    $("#CustomerConnectionStatus").text("Connected");
                     callback();
                 }
                 return;
 
             } else {
-                waitForSocketConnection(socket, callback);
+                WaitForSocketConnection(socket, callback);
             }
 
         }, 100);
 }
 
-function CreateWebSocket() {
-    ws = new WebSocket(wsHost);
-    ws.onopen = function () {
+/**
+ * Create customer WebSocket for communication
+ */
+function CreateCustomerWebSocket() {
+    customerWebSocket = new WebSocket(messageCenterHost);
+    customerWebSocket.onopen = function () {
         isConnectionEstablished = true;
     };
 
-    ws.onmessage = function (evt) {
-        var scrollHeight = document.getElementById('MessageContainer').scrollHeight;
-        var msg = new Message(evt.data);
-        $("#MessageContainer").append(msg.getHtmlContent());
-        $("#MessageContainer").scrollTop(scrollHeight);
-
-        /*var h1 = document.getElementById('MessageContainer').clientHeight;
-        var h2 = document.getElementById('MessageContainer').offsetHeight;
-        var h3 = document.getElementById('MessageContainer').scrollHeight;*/
-
+    customerWebSocket.onmessage = function (evt) {
+        var scrollHeight = document.getElementById('CustomerMessageContainer').scrollHeight;
+        var msg = new CustomerMessage(evt.data);
+        $("#CustomerMessageContainer").append(msg.getHtmlContent());
+        $("#CustomerMessageContainer").scrollTop(scrollHeight);
     };
 
-    ws.onerror = function (evt) {
-        $("#Status").text(evt.message);
+    customerWebSocket.onerror = function (evt) {
+        $("#CustomerConnectionStatus").text(evt.message);
         isConnectionError = true;
     };
 
-    ws.onclose = function () {
-        $("#Status").text("Disconnected");
+    customerWebSocket.onclose = function () {
+        $("#CustomerConnectionStatus").text("Disconnected");
     };
 }
 
-function Message(rawSocketData) {
+/**
+ * Customer message prototype
+ * @param {any} rawSocketData raw data from the server
+ */
+function CustomerMessage(rawSocketData) {
     var data = (typeof(rawSocketData) === "object") ? rawSocketData : JSON.parse(rawSocketData);
 
     this.Content = data.Content;
     this.Sender = data.Sender;
 }
 
-Message.prototype.getHtmlContent = function () {
+/**
+ * Extend customer prototype
+ * @returns {any} Formatted html
+ */
+CustomerMessage.prototype.getHtmlContent = function () {
     let alignClass = this.Sender === SENDER_CUSTOMER ? "message-right" : "message-left";
     return "<div class='message " + alignClass + "'>" +
         this.Content +
@@ -84,6 +98,9 @@ Message.prototype.getHtmlContent = function () {
         "<div class='clearfix'></div>";
 };
 
+/**
+ * Handle customer input visibility
+ */
 function handleConversationVisibility() {
     $container = $(".ewc-container");
     if ($container.is(":visible")) {
@@ -92,3 +109,15 @@ function handleConversationVisibility() {
         $container.fadeIn();
     }
 }
+
+/**
+ * Register default behavior
+ */
+$(document).ready(function () {
+    $("#sendCustomerMessageBtn").on("click", SendCustomerMessage);
+    $('#customerMessageInput').keyup(function (e) {
+        if (e.keyCode === 13) {
+            SendCustomerMessage();
+        }
+    });
+});

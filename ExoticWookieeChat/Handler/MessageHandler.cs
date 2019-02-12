@@ -68,6 +68,12 @@ namespace ExoticWookieeChat.Handler
             WebSocket socket            = context.WebSocket;
 
             byte connectionType = IsEmployeeConnection ? (byte)WebSocketConnection.ConnectionTypes.Employee : (byte)WebSocketConnection.ConnectionTypes.Customer;
+            String SocketType = context.QueryString.Get("SocketType") ?? SocketTypeConstants.MESSAGE_EXCHANGE;
+
+            if(SocketType == SocketTypeConstants.COMMAND_LISTENER)
+            {
+                connectionType = (byte)WebSocketConnection.ConnectionTypes.Command;
+            }
 
             // Create connection
             Locker.EnterWriteLock();
@@ -90,8 +96,6 @@ namespace ExoticWookieeChat.Handler
 
                 Connections.Add(connection);
 
-                String SocketType = context.QueryString.Get("SocketType") ?? SocketTypeConstants.MESSAGE_EXCHANGE;
-
                 // Create Conversation if socket type is MESSAGE_EXCHANGE
                 if (conversation == null && SocketType == SocketTypeConstants.MESSAGE_EXCHANGE)
                     conversation = CreateConversation(socketGuid);
@@ -107,11 +111,8 @@ namespace ExoticWookieeChat.Handler
                 String employeeName = context.User.Identity.Name;
                 employee = dataContext.Users.FirstOrDefault(e => e.UserName == employeeName);
             }
-            else
-            {
-                // Notify employees about new user query
-                await NotfiyEmployees();
-            }
+
+            bool isFirstMessage = true;
             
             // Listen socket
             for (;;)
@@ -121,11 +122,9 @@ namespace ExoticWookieeChat.Handler
 
                 if (socket.State == WebSocketState.Open)
                 {
-                    String sender = IsEmployeeConnection ? SocketMessage.SENDER_SUPPORT : SocketMessage.SENDER_CUSTOMER;
                     String userMessage = Encoding.UTF8.GetString(buffer.Array, 0, result.Count);
                     SocketMessage socketMessage = JsonConvert.DeserializeObject<SocketMessage>(userMessage);
 
-                    socketMessage.Sender = sender;
                     userMessage = JsonConvert.SerializeObject(socketMessage);
 
                     if(conversation != null)
@@ -133,15 +132,27 @@ namespace ExoticWookieeChat.Handler
                         Message msg = new Message()
                         {
                             Content = socketMessage.Content,
+                            Sender = socketMessage.Sender,
                             CreatedAt = DateTime.Now,
                             Conversation = conversation,
-                            Sender = sender,
                             Employee = employee
                         };
 
                         dataContext.Messages.Add(msg);
                         await dataContext.SaveChangesAsync();
                     }
+
+                    if (isFirstMessage)
+                    {
+                        // Notify employees and add new conversation to support interface at first message
+                        if (SocketType == SocketTypeConstants.MESSAGE_EXCHANGE && socketMessage.Sender == SocketMessage.SENDER_CUSTOMER)
+                        {
+                            await NotfiyEmployees();
+                            await AddNewConversationToEmployeeInterface(conversation.Id);
+                        }
+                    }
+
+                    isFirstMessage = false;
 
                     buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(userMessage));
 
@@ -208,6 +219,33 @@ namespace ExoticWookieeChat.Handler
                 Type = (byte)SocketMessage.Types.Command
             };
 
+            await SendCommandMessage(commandMessage);
+        }
+
+        /// <summary>
+        /// Indicate user interface to add new conversation to their list
+        /// </summary>
+        /// <param name="ConversationId"></param>
+        /// <returns></returns>
+        public async Task AddNewConversationToEmployeeInterface(int ConversationId)
+        {
+            SocketMessage commandMessage = new SocketMessage()
+            {
+                Content = ConversationId.ToString(),
+                Command = SocketMessage.COMMAND_ADD_NEW_CONVERSATION,
+                Type = (byte)SocketMessage.Types.Command
+            };
+
+            await SendCommandMessage(commandMessage);
+        }
+
+        /// <summary>
+        /// Send command message to employees
+        /// </summary>
+        /// <param name="commandMessage"></param>
+        /// <returns></returns>
+        private async Task SendCommandMessage(SocketMessage commandMessage)
+        {
             if (Connections.Count > 0)
             {
                 String commandMessageStr = JsonConvert.SerializeObject(commandMessage);
@@ -215,7 +253,7 @@ namespace ExoticWookieeChat.Handler
 
                 foreach (WebSocketConnection wsc in Connections)
                 {
-                    if (wsc.ConnectionType == (byte)WebSocketConnection.ConnectionTypes.Employee)
+                    if (wsc.ConnectionType == (byte)WebSocketConnection.ConnectionTypes.Command)
                     {
                         await wsc.WebSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                     }
@@ -233,7 +271,8 @@ namespace ExoticWookieeChat.Handler
             Conversation conversation = new Conversation()
             {
                 SocketGuid = socketGuid,
-                State = (byte)Conversation.States.New
+                State = (byte)Conversation.States.New,
+                CreatedAt = DateTime.Now
             };
 
             dataContext.Conversations.Add(conversation);
