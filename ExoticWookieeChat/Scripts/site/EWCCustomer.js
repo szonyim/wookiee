@@ -120,4 +120,5 @@ $(document).ready(function () {
             SendCustomerMessage();
         }
     });
+    $(".status-bar").on("click", handleConversationVisibility);
 });

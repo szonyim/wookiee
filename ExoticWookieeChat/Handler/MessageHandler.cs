@@ -207,6 +207,12 @@ namespace ExoticWookieeChat.Handler
 
         public bool IsReusable { get { return false; } }
 
+        // TODO: implement: if last message time over 30 min, close socket
+        public void StartIdleTimer()
+        {
+            throw new Exception("Not implemented yet!");
+        }
+
         /// <summary>
         /// Notfiy all employees about new incoming conversation
         /// </summary>
@@ -298,5 +304,7 @@ namespace ExoticWookieeChat.Handler
 
             return result;
         }
+
+
     }
 }

@@ -352,6 +352,8 @@ function CreateConversationItemHtml(item) {
         itemSign = ClosedItemSign;
     }
 
+    var createdAt = new Date(item.CreatedAt);
+
     return "<div id='ConversationItem_" + item.Id + "' class='list-group-item list-group-item-action'>" +
             "<div class='row'>" +
                 "<div class='col-1'>" +
@@ -361,7 +363,7 @@ function CreateConversationItemHtml(item) {
                     "<a href='javascript:void(0)' id='conversation_" + item.Id + "' onclick='LoadConversation(" + item.Id + ")'>" +
                         item.SocketGuid +
                     "</a><br/>" +
-                    "<small>Now</small>" +
+                    "<small>" + createdAt.toLocaleString() + "</small>" +
                 "</div>" +
                 "<div class='col-1'>" +
                     "<button href='javascript:void(0)' onclick='RemoveConversation(" + item.Id + ")' class='btn btn-danger btn-sm float-right' title='Delete conversation' style='display:inline'> <i class='far fa-trash-alt'></i> </button>" +
