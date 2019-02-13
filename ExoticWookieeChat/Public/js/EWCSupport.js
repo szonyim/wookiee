@@ -317,16 +317,20 @@ function RemoveConversation(ConversationId) {
                 $("#ConversationItem_" + ConversationId).remove();
         }
     );
-
 }
 
+/**
+ * Bind default behaviors
+ */
 $(document).ready(function () {
     $("#ConversationState").on("change", function () {
         ReloadConversationList(this.value);
-        //window.location.href = "/Support?State=" + this.value;
     });
 
-    RegisterCommandListenerWebSocket();
+    let existsValidAuthCookiee = typeof($.cookie('WookieeAuthCookie')) === "undefined" ? false : true;
+    if (existsValidAuthCookiee) {
+        RegisterCommandListenerWebSocket();
+    }
 
     $("#sendMessageBtn").on("click", SendMessage);
     $('#messageInput').keyup(function (e) {

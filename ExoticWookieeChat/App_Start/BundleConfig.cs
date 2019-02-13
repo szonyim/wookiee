@@ -9,7 +9,8 @@ namespace ExoticWookieeChat
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                    "~/Public/vendor/jquery/jquery-3.3.1.min.js"));
+                    "~/Public/vendor/jquery/jquery-3.3.1.min.js",
+                    "~/Public/vendor/jquery/jquery.cookie.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                     "~/Public/vendor/modernizr/modernizr.js"));
