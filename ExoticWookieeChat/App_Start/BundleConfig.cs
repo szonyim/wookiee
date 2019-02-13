@@ -9,34 +9,24 @@ namespace ExoticWookieeChat
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js"));
+                    "~/Public/vendor/jquery/jquery-3.3.1.min.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-                        "~/Scripts/jquery.validate*"));
-
-            // Use the development version of Modernizr to develop with and learn from. Then, when you're
-            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need.
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-                        "~/Scripts/modernizr-*"));
+                    "~/Public/vendor/modernizr/modernizr.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.js"));
+                    "~/Public/vendor/bootstrap/js/bootstrap.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/global").Include(
-                    "~/Scripts/site/EWCGlobal.js"
+            bundles.Add(new ScriptBundle("~/bundles/site").Include(
+                    "~/Public/js/EWCGlobal.js",
+                    "~/Public/js/EWCCustomer.js",
+                    "~/Public/js/EWCSupport.js"
             ));
 
-            bundles.Add(new ScriptBundle("~/bundles/customer").Include(
-                    "~/Scripts/site/EWCCustomer.js"
-            ));
-
-            bundles.Add(new ScriptBundle("~/bundles/support").Include(
-                    "~/Scripts/site/EWCSupport.js"
-            ));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
-                      "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Public/vendor/bootstrap/css/bootstrap.css",
+                      "~/Public/css/Site.css"));
         }
     }
 }
