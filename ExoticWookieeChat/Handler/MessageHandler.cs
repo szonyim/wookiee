@@ -34,11 +34,11 @@ namespace ExoticWookieeChat.Handler
         /// <summary>
         /// DataContext instance
         /// </summary>
-        private DataContext dataContext;
+        private readonly DataContext _dataContext;
 
         public MessageHandler()
         {
-            this.dataContext = DataContext.CreateContext();
+            _dataContext = DataContext.CreateContext();
         }
 
         /// <summary>
@@ -61,16 +61,16 @@ namespace ExoticWookieeChat.Handler
         private async Task ProcessCommunication(AspNetWebSocketContext context)
         {
             WebSocketConnection connection;
-            bool IsEmployeeConnection = context.User.Identity.IsAuthenticated;
+            bool isEmployeeConnection = context.User.Identity.IsAuthenticated;
 
             Guid socketGuid             = Guid.NewGuid();
             Conversation conversation   = null;
             WebSocket socket            = context.WebSocket;
 
-            byte connectionType = IsEmployeeConnection ? (byte)WebSocketConnection.ConnectionTypes.Employee : (byte)WebSocketConnection.ConnectionTypes.Customer;
-            String SocketType = context.QueryString.Get("SocketType") ?? SocketTypeConstants.MESSAGE_EXCHANGE;
+            byte connectionType = isEmployeeConnection ? (byte)WebSocketConnection.ConnectionTypes.Employee : (byte)WebSocketConnection.ConnectionTypes.Customer;
+            String socketType = context.QueryString.Get("SocketType") ?? SocketTypeConstants.MESSAGE_EXCHANGE;
 
-            if(SocketType == SocketTypeConstants.COMMAND_LISTENER)
+            if(socketType == SocketTypeConstants.COMMAND_LISTENER)
             {
                 connectionType = (byte)WebSocketConnection.ConnectionTypes.Command;
             }
@@ -83,7 +83,7 @@ namespace ExoticWookieeChat.Handler
                 if(context.QueryString.Get("customerWebSocketGuid") != null)
                 {
                     channel = Guid.Parse(context.QueryString.Get("customerWebSocketGuid"));
-                    conversation = dataContext.Conversations.FirstOrDefault(c => c.SocketGuid == channel);
+                    conversation = _dataContext.Conversations.FirstOrDefault(c => c.SocketGuid == channel);
                 }
 
                 connection = new WebSocketConnection()
@@ -97,7 +97,7 @@ namespace ExoticWookieeChat.Handler
                 Connections.Add(connection);
 
                 // Create Conversation if socket type is MESSAGE_EXCHANGE
-                if (conversation == null && SocketType == SocketTypeConstants.MESSAGE_EXCHANGE)
+                if (conversation == null && socketType == SocketTypeConstants.MESSAGE_EXCHANGE)
                     conversation = CreateConversation(socketGuid);
             }
             finally
@@ -106,10 +106,10 @@ namespace ExoticWookieeChat.Handler
             }
 
             User employee = null;
-            if (IsEmployeeConnection)
+            if (isEmployeeConnection)
             {
                 String employeeName = context.User.Identity.Name;
-                employee = dataContext.Users.FirstOrDefault(e => e.UserName == employeeName);
+                employee = _dataContext.Users.FirstOrDefault(e => e.UserName == employeeName);
             }
 
             bool isFirstMessage = true;
@@ -138,19 +138,21 @@ namespace ExoticWookieeChat.Handler
                             Employee = employee
                         };
 
-                        dataContext.Messages.Add(msg);
-                        await dataContext.SaveChangesAsync();
-                    }
+                        _dataContext.Messages.Add(msg);
+                        await _dataContext.SaveChangesAsync();
 
-                    if (isFirstMessage)
-                    {
-                        // Notify employees and add new conversation to support interface at first message
-                        if (SocketType == SocketTypeConstants.MESSAGE_EXCHANGE && socketMessage.Sender == SocketMessage.SENDER_CUSTOMER)
+                        if (isFirstMessage)
                         {
-                            await NotfiyEmployees();
-                            await AddNewConversationToEmployeeInterface(conversation.Id);
+                            // Notify employees and add new conversation to support interface at first message
+                            if (socketType == SocketTypeConstants.MESSAGE_EXCHANGE && socketMessage.Sender == SocketMessage.SENDER_CUSTOMER)
+                            {
+                                await NotfiyEmployees();
+                                await AddNewConversationToEmployeeInterface(conversation.Id);
+                            }
                         }
                     }
+
+                    
 
                     isFirstMessage = false;
 
@@ -161,12 +163,12 @@ namespace ExoticWookieeChat.Handler
                     {
                         foreach(var c in Connections)
                         {
-                            if(c.SocketGuid == connection.Channel)
+                            if(c.SocketGuid == connection.Channel && conversation != null)
                             {
                                 if(conversation.State == (byte)Conversation.States.New)
                                 {
                                     conversation.State = (byte)Conversation.States.InProgress;
-                                    await dataContext.SaveChangesAsync();
+                                    await _dataContext.SaveChangesAsync();
                                 }
                                 await c.WebSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                             }
@@ -231,13 +233,13 @@ namespace ExoticWookieeChat.Handler
         /// <summary>
         /// Indicate user interface to add new conversation to their list
         /// </summary>
-        /// <param name="ConversationId"></param>
+        /// <param name="conversationId"></param>
         /// <returns></returns>
-        public async Task AddNewConversationToEmployeeInterface(int ConversationId)
+        public async Task AddNewConversationToEmployeeInterface(int conversationId)
         {
             SocketMessage commandMessage = new SocketMessage()
             {
-                Content = ConversationId.ToString(),
+                Content = conversationId.ToString(),
                 Command = SocketMessage.COMMAND_ADD_NEW_CONVERSATION,
                 Type = (byte)SocketMessage.Types.Command
             };
@@ -281,8 +283,8 @@ namespace ExoticWookieeChat.Handler
                 CreatedAt = DateTime.Now
             };
 
-            dataContext.Conversations.Add(conversation);
-            dataContext.SaveChanges();
+            _dataContext.Conversations.Add(conversation);
+            _dataContext.SaveChanges();
 
             return conversation;
         }
@@ -294,12 +296,14 @@ namespace ExoticWookieeChat.Handler
         /// <returns></returns>
         private int CloseConversation(Guid socketGuid)
         {
-            int result = 0;
-            Conversation conversation = dataContext.Conversations.FirstOrDefault(c => c.SocketGuid == socketGuid);
+            var result = 0;
+
+            var conversation = _dataContext.Conversations.FirstOrDefault(c => c.SocketGuid == socketGuid);
+            // ReSharper disable once InvertIf
             if(conversation != null)
             {
                 conversation.State = (byte)Conversation.States.Closed;
-                result = dataContext.SaveChanges();
+                result = _dataContext.SaveChanges();
             }
 
             return result;

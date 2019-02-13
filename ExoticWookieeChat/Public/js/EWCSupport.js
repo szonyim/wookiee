@@ -327,13 +327,12 @@ $(document).ready(function () {
         ReloadConversationList(this.value);
     });
 
-    let existsValidAuthCookiee = typeof($.cookie('WookieeAuthCookie')) === "undefined" ? false : true;
-    if (existsValidAuthCookiee) {
+    if (HasValidAuthCookie()) {
         RegisterCommandListenerWebSocket();
     }
 
     $("#sendMessageBtn").on("click", SendMessage);
-    $('#messageInput').keyup(function (e) {
+    $("#messageInput").keyup(function (e) {
         if (e.keyCode === 13) {
             SendMessage();
         }

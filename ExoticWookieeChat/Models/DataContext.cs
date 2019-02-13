@@ -38,12 +38,11 @@ namespace ExoticWookieeChat.Models
     /// <summary>
     /// Initalize database. Add first employee, who can add other employee
     /// </summary>
-    //public class EWCDBInitializer : DropCreateDatabaseIfModelChanges<DataContext>
     public class EWCDBInitializer: CreateDatabaseIfNotExists<DataContext>
     {
         protected override void Seed(DataContext context)
         {
-            User firstEmp = new User()
+            var firstEmp = new User()
             {
                 DisplayName = "Admin",
                 UserName = "admin",

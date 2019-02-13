@@ -13,13 +13,6 @@ namespace ExoticWookieeChat.Controllers
     /// </summary>
     public class AuthController : Controller
     {
-        private readonly DataContext dc;
-
-        public AuthController()
-        {
-            dc = DataContext.CreateContext();
-        }
-
         [HttpGet]
         public ActionResult Login()
         {
@@ -29,7 +22,7 @@ namespace ExoticWookieeChat.Controllers
         [HttpPost]
         public ActionResult Login(LoginViewModel loginViewModel)
         {
-            bool LoginError = false;
+            bool loginError = false;
 
             try
             {
@@ -53,20 +46,20 @@ namespace ExoticWookieeChat.Controllers
                         }
                         else
                         {
-                            LoginError = true;
+                            loginError = true;
                         }
                     }
                 }
                 else
                 {
-                    LoginError = true;
+                    loginError = true;
                 }
-            }catch(Exception e)
+            }catch(Exception)
             {
-                LoginError = true;
+                loginError = true;
             }
 
-            ViewBag.LoginError = LoginError;
+            ViewBag.LoginError = loginError;
             return View(loginViewModel);
         }
 

@@ -13,6 +13,10 @@ const ConversationStates = {
     Closed: 2
 };
 
+function HasValidAuthCookie() {
+    return typeof($.cookie('WookieeAuthCookie')) === "undefined" ? false : true;
+}
+
 function Logout() {
     document.cookie = 'WookieeAuthCookie=; Max-Age=-99999999;';
     window.location.href = "/Auth/Logout";

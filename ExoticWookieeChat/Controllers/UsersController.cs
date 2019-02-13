@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using ExoticWookieeChat.Constants;
 using ExoticWookieeChat.Models;
@@ -94,12 +91,17 @@ namespace ExoticWookieeChat.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,DisplayName,UserName")] User user)
         {
-            if (ModelState.IsValid)
+            User dbUser = db.Users.Find(user.Id);
+            if (dbUser != null)
             {
-                db.Entry(user).State = EntityState.Modified;
+                dbUser.DisplayName = user.DisplayName;
+                dbUser.UserName = user.UserName;
+
+                db.Entry(dbUser).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            
             return View(user);
         }
 
@@ -124,8 +126,10 @@ namespace ExoticWookieeChat.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             User user = db.Users.Find(id);
-            db.Users.Remove(user);
-            db.SaveChanges();
+            if(user != null) { 
+                db.Users.Remove(user);
+                db.SaveChanges();
+            }
             return RedirectToAction("Index");
         }
 

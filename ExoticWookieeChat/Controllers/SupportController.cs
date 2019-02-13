@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace ExoticWookieeChat.Controllers
@@ -12,11 +11,11 @@ namespace ExoticWookieeChat.Controllers
     [Authorize(Roles = UserRoleConstants.ROLE_EMPLOYEE)]
     public class SupportController : Controller
     {
-        private readonly DataContext dataContext;
+        private readonly DataContext _dataContext;
 
         public SupportController()
         {
-            dataContext = DataContext.CreateContext();
+            _dataContext = DataContext.CreateContext();
         }
 
         /// <summary>
@@ -28,29 +27,29 @@ namespace ExoticWookieeChat.Controllers
         {
             String filter = Request.QueryString.Get("State") ?? ConversationConstants.STATE_NEW;
 
-            List<Conversation> Conversations = null;
+            List<Conversation> conversations;
             switch (filter)
             {
                 case ConversationConstants.STATE_NEW:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.New).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.New).ToList();
                     break;
 
                 case ConversationConstants.STATE_IN_PROGRESS:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.InProgress).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.InProgress).ToList();
                     break;
 
                 case ConversationConstants.STATE_CLOSED:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.Closed).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.Closed).ToList();
                     break;
 
                 default:
-                    Conversations = dataContext.Conversations.ToList<Conversation>();
+                    conversations = _dataContext.Conversations.ToList();
                     break;
             }
 
             ViewBag.Filter = filter;
             ViewBag.Title = "Conversation list";
-            ViewBag.Conversations = Conversations.Reverse<Conversation>();
+            ViewBag.Conversations = conversations.Reverse<Conversation>();
 
             return View();
         }
@@ -59,55 +58,42 @@ namespace ExoticWookieeChat.Controllers
         /// Return with one serialized Conversation object or an empty string
         /// </summary>
         /// <returns>Json string</returns>
-        public String GetConversation()
+        public string GetConversation()
         {
-            Conversation conversation = null;
             int conversationId = Convert.ToInt32(Request.QueryString.Get("ConversationId"));
-            using (var dataContext = DataContext.CreateContext())
-            {
-                conversation = dataContext.Conversations.Find(conversationId);
-                if (conversation == null)
-                    return "";
-
-                String response = Serialize(conversation);
-                return response;
-            }
+            Conversation conversation = _dataContext.Conversations.Find(conversationId);
+            return conversation == null ? "" : Serialize(conversation);
         }
 
         /// <summary>
         /// Return with serialized conversation list
         /// </summary>
         /// <returns></returns>
-        public String GetConversationList()
+        public string GetConversationList()
         {
             String filter = Request.QueryString.Get("State") ?? ConversationConstants.STATE_NEW;
 
-            List<Conversation> Conversations = null;
+            List<Conversation> conversations;
             switch (filter)
             {
                 case ConversationConstants.STATE_NEW:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.New).OrderByDescending(c => c.Id).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.New).OrderByDescending(c => c.Id).ToList();
                     break;
 
                 case ConversationConstants.STATE_IN_PROGRESS:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.InProgress).OrderByDescending(c => c.Id).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.InProgress).OrderByDescending(c => c.Id).ToList();
                     break;
 
                 case ConversationConstants.STATE_CLOSED:
-                    Conversations = dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.Closed).OrderByDescending(c => c.Id).ToList<Conversation>();
+                    conversations = _dataContext.Conversations.Where(c => c.State == (byte)Conversation.States.Closed).OrderByDescending(c => c.Id).ToList();
                     break;
 
                 default:
-                    Conversations = dataContext.Conversations.ToList<Conversation>();
+                    conversations = _dataContext.Conversations.ToList();
                     break;
             }
 
-            if(Conversations == null)
-            {
-                return "";
-            }
-
-            return Serialize(Conversations);
+            return Serialize(conversations);
         }
 
         /// <summary>
@@ -115,7 +101,7 @@ namespace ExoticWookieeChat.Controllers
         /// </summary>
         /// <returns>Result of action</returns>
         [HttpGet]
-        public String RemoveConversation()
+        public string RemoveConversation()
         {
             IDictionary<string, string> response = new Dictionary<string, string>();
 
@@ -125,11 +111,14 @@ namespace ExoticWookieeChat.Controllers
                 using(DataContext dataContext = DataContext.CreateContext())
                 {
                     Conversation conversation = dataContext.Conversations.Find(conversationId);
-                    dataContext.Conversations.Remove(conversation);
-                    dataContext.SaveChanges();
-                    response.Add("result", "success");
+                    if (conversation != null)
+                    {
+                        dataContext.Conversations.Remove(conversation);
+                        dataContext.SaveChanges();
+                        response.Add("result", "success");
+                    }
                 }
-            } catch(Exception e) {
+            } catch(Exception) {
                 response.Add("result", "error");
             }
 
@@ -141,13 +130,13 @@ namespace ExoticWookieeChat.Controllers
         /// </summary>
         /// <returns></returns>
         [AllowAnonymous]
-        public String LoadConversation()
+        public string LoadConversation()
         {
             int conversationId = Convert.ToInt32(Request.QueryString.Get("ConversationId"));
             using (var dataContext = DataContext.CreateContext())
             {
                 Conversation conversation = dataContext.Conversations.Find(conversationId);
-                if(conversation != null && conversation.Messages.Count() > 0)
+                if(conversation != null && conversation.Messages.Any())
                 {
                     var responseData = new Dictionary<string, object>();
                     responseData.Add("conversation", conversation);
@@ -174,7 +163,7 @@ namespace ExoticWookieeChat.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns>Serialized object</returns>
-        private String Serialize(object data)
+        private static string Serialize(object data)
         {
             var serializedData = JsonConvert.SerializeObject(
                 data,
